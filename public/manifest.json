@@ -1,0 +1,9 @@
+{
+  "name": "FXEC Student Tracker",
+  "short_name": "FXEC Tracker",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F7F5F0",
+  "theme_color": "#1B4332",
+  "icons": []
+}
