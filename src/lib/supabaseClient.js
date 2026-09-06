@@ -12,11 +12,7 @@ if (!url || !key) {
 
 export const supabase = createClient(url || '', key || '');
 
-// Only these email domains are allowed to sign in. Add the admin/club-lead
-// emails to ADMIN_EMAILS so they land on the admin dashboard instead of the
-// student one.
+// Only this email domain is allowed to sign in. Who is an admin vs a
+// student is decided by the `role` column in the `profiles` table (Supabase
+// Table Editor -> profiles -> set role = 'admin' for that row), not here.
 export const ALLOWED_DOMAIN = '@francisxavier.ac.in';
-
-export const ADMIN_EMAILS = [
-  // 'yourname@francisxavier.ac.in',
-];
