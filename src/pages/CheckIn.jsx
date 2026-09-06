@@ -1,20 +1,63 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../lib/AuthContext';
 import { supabase } from '../lib/supabaseClient';
-import { ACTIVITY_OPTIONS, ZONES } from '../lib/zones';
+import { ACTIVITY_OPTIONS } from '../lib/zones';
 import { matchZone, currentSlot, checkConsistency } from '../lib/geofence';
+
+const STATUS_LABEL = {
+  verified: 'Verified',
+  mismatch: 'Flagged for review',
+  review: 'Sent for admin review',
+  missed: 'Missed',
+};
+
+const STATUS_DESC = {
+  verified: 'Your location matched your plan. See you at the next check-in.',
+  mismatch: 'Your location and plan didn\u2019t match. This has been sent to admin for review.',
+  review: '"Others" is always checked by admin manually. Your task plan has been recorded.',
+};
 
 export default function CheckIn() {
   const { session } = useAuth();
+  const slot = currentSlot();
+
+  const [checking, setChecking] = useState(true);
+  const [alreadyDone, setAlreadyDone] = useState(null);
+
   const [locating, setLocating] = useState(false);
   const [coords, setCoords] = useState(null);
-  const [zone, setZone] = useState(undefined); // undefined = not checked yet
+  const [zone, setZone] = useState(undefined);
   const [activityId, setActivityId] = useState(null);
+  const [taskPlan, setTaskPlan] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  const slot = currentSlot();
+  useEffect(() => {
+    if (!slot) {
+      setChecking(false);
+      return;
+    }
+    checkExisting();
+  }, [slot?.id]);
+
+  async function checkExisting() {
+    setChecking(true);
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const { data } = await supabase
+      .from('checkins')
+      .select('*')
+      .eq('student_id', session.user.id)
+      .eq('slot_number', slot.id)
+      .gte('created_at', todayStart.toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    setAlreadyDone(data || null);
+    setChecking(false);
+  }
 
   function locate() {
     setLocating(true);
@@ -44,10 +87,27 @@ export default function CheckIn() {
   }
 
   async function submit() {
-    if (!slot || !coords || !activityId) return;
+    if (!slot || !coords || !activityId || !taskPlan.trim()) return;
     setSubmitting(true);
     const activity = ACTIVITY_OPTIONS.find((a) => a.id === activityId);
     const status = checkConsistency(activity, zone?.id);
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const { data: existing } = await supabase
+      .from('checkins')
+      .select('id')
+      .eq('student_id', session.user.id)
+      .eq('slot_number', slot.id)
+      .gte('created_at', todayStart.toISOString())
+      .limit(1)
+      .maybeSingle();
+
+    if (existing) {
+      setSubmitting(false);
+      setAlreadyDone(existing);
+      return;
+    }
 
     const { error: dbError } = await supabase.from('checkins').insert({
       student_id: session.user.id,
@@ -56,6 +116,7 @@ export default function CheckIn() {
       lng: coords.lng,
       zone_matched: zone?.id || null,
       activity_claimed: activityId,
+      task_plan: taskPlan.trim(),
       status,
     });
 
@@ -84,21 +145,30 @@ export default function CheckIn() {
     );
   }
 
-  if (result) {
+  if (checking) {
+    return <div className="content" style={{ color: 'var(--muted)', fontSize: 13 }}>Checking today's record...</div>;
+  }
+
+  const finalStatus = result || alreadyDone?.status;
+
+  if (finalStatus) {
     return (
       <div className="content">
         <div className="section-head">
           <h2>{slot.label} recorded</h2>
         </div>
         <div className="zone-locate">
-          <div className={`status ${result}`} style={{ margin: '0 auto 10px', width: 'fit-content' }}>
-            {result === 'verified' ? 'Verified' : result === 'mismatch' ? 'Flagged for review' : 'Missed'}
+          <div className={`status ${finalStatus}`} style={{ margin: '0 auto 10px', width: 'fit-content' }}>
+            {STATUS_LABEL[finalStatus]}
           </div>
           <div className="zone-status">
-            {result === 'verified'
-              ? 'Your location matched your plan. See you at the next check-in.'
-              : 'Your location and plan didn\u2019t match. This has been sent to admin for review.'}
+            {STATUS_DESC[finalStatus] || 'Already recorded for this slot.'}
           </div>
+          {alreadyDone?.task_plan && (
+            <div className="zone-status" style={{ marginTop: 10 }}>
+              Your plan: &ldquo;{alreadyDone.task_plan}&rdquo;
+            </div>
+          )}
         </div>
       </div>
     );
@@ -131,7 +201,7 @@ export default function CheckIn() {
         <>
           <div className="zone-locate">
             <div className="zone-status">Detected zone</div>
-            <div className="zone-name">{zone ? zone.name : 'Outside campus zones'}</div>
+            <div className="zone-name">{zone ? zone.name : 'Outside campus'}</div>
           </div>
 
           <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 10 }}>
@@ -149,10 +219,30 @@ export default function CheckIn() {
             ))}
           </div>
 
+          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 8 }}>
+            Task plan - what exactly are you working on?
+          </div>
+          <textarea
+            value={taskPlan}
+            onChange={(e) => setTaskPlan(e.target.value)}
+            placeholder="e.g. Finishing DBMS assignment 3, or: Elite club - designing the attendance portal UI"
+            rows={3}
+            style={{
+              width: '100%',
+              border: '1px solid var(--paper-line)',
+              borderRadius: 'var(--radius)',
+              padding: 10,
+              fontSize: 13,
+              fontFamily: 'inherit',
+              marginBottom: 16,
+              resize: 'vertical',
+            }}
+          />
+
           <button
             className="submit-btn"
             onClick={submit}
-            disabled={!activityId || submitting}
+            disabled={!activityId || !taskPlan.trim() || submitting}
           >
             {submitting ? 'Submitting...' : 'Submit check-in'}
           </button>
