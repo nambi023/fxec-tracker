@@ -1,0 +1,369 @@
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap');
+
+:root{
+  --ink: #1C1E1B;
+  --green: #1B4332;
+  --green-deep: #10261C;
+  --gold: #A8792E;
+  --paper: #F6F4EE;
+  --paper-line: #DDD8C8;
+  --muted: #6B6A5F;
+  --flag: #A13D2B;
+  --ok: #2F5F3F;
+  --radius: 3px;
+}
+
+*{ box-sizing: border-box; }
+
+html,body,#root{ height:100%; }
+
+body{
+  margin:0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,h2,h3{
+  font-family: 'Source Serif 4', Georgia, serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.mono{ font-family: 'IBM Plex Mono', monospace; }
+
+a{ color: inherit; }
+
+button{
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ---------- Shell ---------- */
+.shell{
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar{
+  border-bottom: 1px solid var(--paper-line);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--paper);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.brand-mark{
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--green);
+  color: var(--paper);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family: 'Source Serif 4', serif;
+  font-weight:700;
+  font-size: 14px;
+  flex-shrink:0;
+}
+
+.brand-name{
+  font-size: 15px;
+  line-height: 1.2;
+}
+.brand-name small{
+  display:block;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.signout{
+  border:1px solid var(--paper-line);
+  background: transparent;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  font-size: 13px;
+  color: var(--muted);
+}
+.signout:hover{ border-color: var(--green); color: var(--green); }
+
+.content{
+  flex:1;
+  max-width: 760px;
+  width:100%;
+  margin: 0 auto;
+  padding: 28px 20px 60px;
+}
+
+/* ---------- Login ---------- */
+.login-wrap{
+  min-height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding: 20px;
+}
+
+.login-card{
+  width:100%;
+  max-width: 380px;
+  border: 1px solid var(--paper-line);
+  padding: 36px 28px;
+  background: white;
+}
+
+.login-crest{
+  width:52px; height:52px;
+  border-radius:50%;
+  background: var(--green);
+  color: var(--paper);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Source Serif 4', serif;
+  font-size:22px;
+  font-weight:700;
+  margin: 0 auto 18px;
+}
+
+.login-title{
+  text-align:center;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+.login-sub{
+  text-align:center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 26px;
+  line-height:1.5;
+}
+
+.google-btn{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  border: 1px solid var(--ink);
+  background: var(--ink);
+  color: white;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight:500;
+}
+.google-btn:hover{ background: var(--green-deep); border-color: var(--green-deep); }
+
+.login-foot{
+  margin-top:16px;
+  font-size:12px;
+  color: var(--muted);
+  text-align:center;
+  line-height:1.6;
+}
+
+.login-error{
+  margin-top:14px;
+  font-size:13px;
+  color: var(--flag);
+  background: #FBEEEA;
+  border: 1px solid #EFD3C9;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+}
+
+/* ---------- Section headers ---------- */
+.section-head{
+  display:flex;
+  align-items:baseline;
+  justify-content:space-between;
+  border-bottom: 1px solid var(--ink);
+  padding-bottom: 8px;
+  margin-bottom: 18px;
+}
+.section-head h2{ font-size: 19px; }
+.section-head .date{ color: var(--muted); font-size: 12px; }
+
+/* ---------- Stat row ---------- */
+.stat-row{
+  display:grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 1px;
+  background: var(--paper-line);
+  border: 1px solid var(--paper-line);
+  margin-bottom: 26px;
+}
+.stat{
+  background: var(--paper);
+  padding: 16px 14px;
+}
+.stat .num{
+  font-family:'Source Serif 4', serif;
+  font-size: 28px;
+  font-weight:600;
+  line-height:1;
+}
+.stat .label{
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.stat.accent .num{ color: var(--green); }
+
+/* ---------- Slot ledger ---------- */
+.ledger{
+  border: 1px solid var(--paper-line);
+  border-bottom:none;
+}
+.ledger-row{
+  display:grid;
+  grid-template-columns: 88px 1fr 100px;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 13px;
+  align-items:center;
+}
+.ledger-row.head{
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+.ledger-cell{ padding: 11px 12px; }
+.ledger-row .status{
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 100px;
+  display:inline-block;
+  text-align:center;
+  width: fit-content;
+}
+.status.verified{ background:#E6EFE8; color: var(--ok); }
+.status.mismatch{ background:#F8E7E2; color: var(--flag); }
+.status.pending{ background:#F0EEE4; color: var(--muted); }
+.status.missed{ background:#F1F1F1; color: #8a8a8a; }
+.status.review{ background:#F3EBD8; color: var(--gold); }
+
+/* ---------- Check-in ---------- */
+.checkin-banner{
+  border: 1px solid var(--green);
+  background: #EEF3ED;
+  padding: 16px;
+  margin-bottom: 22px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap: 12px;
+}
+.checkin-banner .timer{
+  font-family:'IBM Plex Mono', monospace;
+  font-size: 20px;
+  color: var(--green);
+}
+
+.zone-locate{
+  border: 1px dashed var(--paper-line);
+  padding: 22px;
+  text-align:center;
+  margin-bottom: 20px;
+}
+.zone-locate .zone-name{
+  font-family:'Source Serif 4', serif;
+  font-size: 18px;
+  margin: 8px 0 2px;
+}
+.zone-locate .zone-status{
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.locate-btn{
+  background: var(--green);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 500;
+}
+.locate-btn:disabled{ background: #B7C4BB; cursor: not-allowed; }
+
+.activity-grid{
+  display:grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 8px;
+  margin: 18px 0;
+}
+.activity-opt{
+  border: 1px solid var(--paper-line);
+  background: white;
+  padding: 12px;
+  text-align:left;
+  border-radius: var(--radius);
+  font-size: 13px;
+}
+.activity-opt.selected{
+  border-color: var(--green);
+  background: #EEF3ED;
+  color: var(--green-deep);
+  font-weight:500;
+}
+
+.submit-btn{
+  width:100%;
+  background: var(--ink);
+  color: white;
+  border:none;
+  padding: 13px;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight:500;
+}
+.submit-btn:disabled{ background:#C6C4B8; cursor:not-allowed; }
+
+.plan-note{
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+/* ---------- Admin ---------- */
+.admin-table{
+  width:100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.admin-table th{
+  text-align:left;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight:500;
+  border-bottom: 1px solid var(--ink);
+  padding: 8px 10px;
+}
+.admin-table td{
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.badge-flagged{
+  color: var(--flag);
+  font-size: 11px;
+  font-weight:600;
+}
+
+@media (max-width: 480px){
+  .stat-row{ grid-template-columns: 1fr; }
+  .activity-grid{ grid-template-columns: 1fr; }
+  .ledger-row{ grid-template-columns: 70px 1fr 84px; font-size:12px; }
+}
