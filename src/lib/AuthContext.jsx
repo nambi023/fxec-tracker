@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase, ALLOWED_DOMAIN, ADMIN_EMAILS } from './supabaseClient';
+import { supabase, ALLOWED_DOMAIN } from './supabaseClient';
 
 const AuthContext = createContext(null);
 
@@ -7,10 +7,11 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
   const [domainError, setDomainError] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      handleSession(data.session);
+    supabase.auth.getSession().then(async ({ data }) => {
+      await handleSession(data.session);
       setLoading(false);
     });
 
@@ -21,18 +22,27 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
-  function handleSession(sess) {
+  async function handleSession(sess) {
     if (sess?.user?.email && !sess.user.email.endsWith(ALLOWED_DOMAIN)) {
-      // Wrong domain snuck through (e.g. personal Gmail) - reject client-side.
-      // NOTE: this must ALSO be enforced server-side via a Supabase Auth Hook
-      // (see supabase/schema.sql) so it can't be bypassed by disabling JS.
       supabase.auth.signOut();
       setSession(null);
+      setIsAdmin(false);
       setDomainError(true);
       return;
     }
     setDomainError(false);
     setSession(sess);
+
+    if (sess?.user?.id) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', sess.user.id)
+        .single();
+      setIsAdmin(profile?.role === 'admin');
+    } else {
+      setIsAdmin(false);
+    }
   }
 
   async function signInWithGoogle() {
@@ -40,7 +50,7 @@ export function AuthProvider({ children }) {
       provider: 'google',
       options: {
         redirectTo: window.location.origin,
-        queryParams: { hd: ALLOWED_DOMAIN.replace('@', '') }, // hints Google to only show college accounts
+        queryParams: { hd: ALLOWED_DOMAIN.replace('@', '') },
       },
     });
   }
@@ -48,10 +58,6 @@ export function AuthProvider({ children }) {
   async function signOut() {
     await supabase.auth.signOut();
   }
-
-  const isAdmin = session?.user?.email
-    ? ADMIN_EMAILS.includes(session.user.email)
-    : false;
 
   return (
     <AuthContext.Provider
